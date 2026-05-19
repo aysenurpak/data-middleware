@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  middleware:
+    build: ./middleware
+    container_name: middleware
+    ports:
+      - "8000:8000"
+    networks:
+      - exchange-net
+    volumes:
+      - ./middleware/output:/app/output
+
+  producer:
+    build: ./producer
+    container_name: producer
+    depends_on:
+      - middleware
+    environment:
+      - MIDDLEWARE_URL=http://middleware:8000
+    networks:
+      - exchange-net
+
+networks:
+  exchange-net:
+    driver: bridge
