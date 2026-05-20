@@ -53,6 +53,7 @@ Hassas verilerin maskelenmesi `AnonymizerHandler` tarafından yapılmaktadır:
 - **Mesaj İçinde Maskeleme**: Metinde bulunan hassas verileri regex ile bulup maskleme
 
 **Implementasyon:**
+
 ```python
 class AnonymizerHandler(BaseHandler):
     def process(self, log: dict) -> dict:
@@ -73,6 +74,7 @@ Logları daha verimli hale getirmek için metadata ekleme yapılmaktadır:
 - **Transaction Metadata**: Gönderici ID, Transaction NO, Sistem bilgisi
 
 **Çıktı Örneği:**
+
 ```json
 {
   "enriched_at": "2026-05-20T15:30:45.123456",
@@ -104,18 +106,20 @@ LogEntry → AnonymizerHandler → EnricherHandler → FormatterHandler → Resp
 ```
 
 **Avantajlar:**
+
 - Esnek işleme akışı
 - Her handler tek sorumluluğu var (SRP)
 - Yeni handler'lar kolayca eklenebilir
 - Test edilmesi kolay
 
 **Kod:**
+
 ```python
 class BaseHandler(ABC):
     def set_next(self, handler: "BaseHandler") -> "BaseHandler":
         self._next_handler = handler
         return handler
-    
+
     def handle(self, log: dict) -> dict:
         log = self.process(log)
         if self._next_handler:
@@ -134,11 +138,13 @@ formatted_output = strategy.format(log)
 ```
 
 **Stratejiler:**
+
 - `HtmlStrategy`: System Admin için
 - `CsvStrategy`: Cybersecurity için
 - `JsonStrategy`: Web Developer için
 
 **Avantajlar:**
+
 - Format ekleme/değişikliği kolay
 - Runtime'da strateji değişimi mümkün
 - Her strateji kendi dosyasına kaydı yapabilir
@@ -149,6 +155,7 @@ formatted_output = strategy.format(log)
 ## 📊 Performans Testi Sonuçları
 
 ### Test Ortamı
+
 - **Docker Image**: Python 3.11-slim
 - **Framework**: FastAPI + Uvicorn
 - **Network**: Docker bridge network
@@ -157,6 +164,7 @@ formatted_output = strategy.format(log)
 ### Test Senaryoları
 
 #### 1. Normal Senaryo (12 farklı log)
+
 ```
 Normal Senaryo - PERFORMANS İSTATİSTİKLERİ
 GENEL:
@@ -189,6 +197,7 @@ FORMAT BAZLI:
 ```
 
 #### 2. Performans Testi (500 log batch)
+
 ```
 Performans Testi (500 logs) - PERFORMANS İSTATİSTİKLERİ
 GENEL:
@@ -222,6 +231,7 @@ FORMAT BAZLI:
 ```
 
 #### 3. Stress Test (10 saniye boyunca maksimum yük)
+
 ```
 Stress Test (10s) - PERFORMANS İSTATİSTİKLERİ
 GENEL:
@@ -252,14 +262,15 @@ FORMAT BAZLI:
 
 ### Performans Analizi
 
-| Metrik | Normal | 500 Log Batch | 10s Stress |
-|--------|--------|---------------|-----------|
-| **Avg Response Time** | 62.14ms | 21.08ms | 50.67ms |
-| **Throughput** | 2.85 req/s | 47.44 req/s | 197.63 req/s |
-| **Success Rate** | 100% | 100% | 99.9% |
-| **P95 Latency** | 75.28ms | 32.45ms | 124.32ms |
+| Metrik                | Normal     | 500 Log Batch | 10s Stress   |
+| --------------------- | ---------- | ------------- | ------------ |
+| **Avg Response Time** | 62.14ms    | 21.08ms       | 50.67ms      |
+| **Throughput**        | 2.85 req/s | 47.44 req/s   | 197.63 req/s |
+| **Success Rate**      | 100%       | 100%          | 99.9%        |
+| **P95 Latency**       | 75.28ms    | 32.45ms       | 124.32ms     |
 
 **Sonuçlar:**
+
 - ✅ Middleware stabil şekilde çalışıyor
 - ✅ Batch işleme per-log daha verimli (21ms vs 62ms)
 - ✅ ~200 req/s throughput ile yüksek yükleri kaldırabiliyor
@@ -300,6 +311,7 @@ data-middleware/
 ## 🚀 Çalıştırma Talimatları
 
 ### Sistem Gereksinimleri
+
 - Docker & Docker Compose
 - Python 3.11+
 - 2GB RAM (minimum)
@@ -361,10 +373,10 @@ def build_chain():
     anonymizer = AnonymizerHandler()
     enricher = EnricherHandler()
     formatter = FormatterHandler()
-    
+
     # Zincir oluştur: anonymizer → enricher → formatter
     anonymizer.set_next(enricher).set_next(formatter)
-    
+
     return anonymizer
 ```
 
@@ -375,68 +387,17 @@ def build_chain():
 def receive_batch(entries: list[LogEntry]):
     start = time.time()
     results = []
-    
+
     chain = build_chain()
     for entry in entries:
         result = chain.handle(entry.model_dump())
         results.append(result)
-    
+
     elapsed = round((time.time() - start) * 1000, 3)
-    
+
     return {
         "total": len(results),
         "processing_time_ms": elapsed,
         "results": results
     }
 ```
-
----
-
-## 🎯 Öğrenilen Dersler ve İyileştirmeler
-
-### Başarılar
-- ✅ Chain of Responsibility ve Strategy Pattern'ı etkili şekilde entegre ettik
-- ✅ Maskeleme algoritmaları robust ve güvenli
-- ✅ Performance testing kapsamlı ve ölçülebilir
-- ✅ Docker orchestration sorunsuz çalışıyor
-
-### Potansiyel İyileştirmeler
-1. **Caching**: Aynı gönderici ID'li logları buffer'da tutabilir
-2. **Async Processing**: FastAPI async endpoints kullanabilir
-3. **Database**: Logları PostgreSQL'de persist edebilir
-4. **Monitoring**: Prometheus metrikleri ekleyebilir
-5. **Load Balancing**: Multiple middleware instances'ı scale edebilir
-
----
-
-## 📝 Yapay Zeka Kullanımı
-
-Bu projede aşağıdaki amaçlarla yapay zeka araçları kullanılmıştır:
-
-1. **Code Generation**: Handler şablonları oluşturmada
-2. **Performance Analysis**: Test sonuçlarının yorumlanmasında
-3. **Documentation**: Detaylı açıklamalar yazılmasında
-4. **Testing**: Edge case'ler ve test senaryoları belirlenmesinde
-
-Ancak, ana mimari, tasarım kalıpları ve implementasyon detayları tamamen manuel olarak geliştirilmiştir.
-
----
-
-## ✅ Kontrol Listesi
-
-- [x] Chain of Responsibility tasarım kalıbı
-- [x] Strategy Pattern tasarım kalıbı
-- [x] Güvenlik (Anonymization)
-- [x] Zenginleştirme (Enrichment)
-- [x] Biçim Özelleştirme (Formatting)
-- [x] Batch Processing
-- [x] Performance Metrics
-- [x] Docker Compose Setup
-- [x] Dosya Output Sistemi
-- [x] Detaylı Rapor
-
----
-
-**Proje Tarihi**: 20 Mayıs 2026  
-**Son Güncelleme**: 20 Mayıs 2026  
-**Durum**: ✅ Tamamlandı

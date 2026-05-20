@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from handlers.base_handler import BaseHandler
 from handlers.strategy import StrategyFactory
@@ -28,8 +29,15 @@ class FormatterHandler(BaseHandler):
     # -------- Dosya Çıktısı --------
     def _save_to_file(self, log: dict, strategy) -> None:
         """Stratejinin belirttiği dosyaya yaz"""
-        output_dir = Path("/app/output")
-        output_dir.mkdir(exist_ok=True)
+        # Docker ve lokal ortam için path desteği
+        current_dir = Path(__file__).parent.parent  # middleware klasörü
+        
+        if os.path.exists("/app/output"):
+            output_dir = Path("/app/output")  # Docker container
+        else:
+            output_dir = current_dir / "output"  # Lokal - middleware/output
+
+        output_dir.mkdir(exist_ok=True, parents=True)
 
         filename = f"{strategy.get_filename()}{strategy.get_file_extension()}"
         file_path = output_dir / filename

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "source": "STOCK_EXCHANGE_v1",
+    "version": "1.0.0",
+    "enriched_at": "2026-05-20T17:03:37.032952"
+  },
+  "event": {
+    "level": "CRITICAL",
+    "severity": "🔴 KRİTİK",
+    "score": 5,
+    "action": "IMMEDIATE_ACTION",
+    "tags": [
+      "borsa",
+      "middleware",
+      "alert",
+      "urgent",
+      "notify-team",
+      "identity-data"
+    ]
+  },
+  "sender": {
+    "id": "S3",
+    "transaction_no": "T3",
+    "email": null
+  },
+  "security": {
+    "credit_card": null,
+    "tc_kimlik": "123****8901"
+  },
+  "message": "System critical",
+  "timestamp": {
+    "date": "2026-05-20",
+    "time": "17:03:37",
+    "day_of_week": "Wednesday"
+  }
+}

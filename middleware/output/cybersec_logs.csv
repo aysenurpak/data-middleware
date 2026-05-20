@@ -1,0 +1,2 @@
+level,severity_score,severity_label,sender_id,transaction_no,date,time,day_of_week,message,recommended_action,credit_card,email,tc_kimlik,source_system,middleware_version
+WARNING,3,🟡 UYARI,S2,T2,2026-05-20,17:03:37,Wednesday,Security warning,MONITOR,,t**t@example.com,,STOCK_EXCHANGE_v1,1.0.0
